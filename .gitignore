@@ -1,0 +1,47 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Output of the go coverage tool
+*.cover
+
+# Temporary files
+*.tmp
+
+# Directory for dependencies
+vendor/
+
+# Go workspace file
+go.work
+
+# Go build cache
+*.cache
+
+# IDE/editor specific files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Go module files
+go.sum
+
+# Logs
+*.log
+
+# Coverage files
+*.cov
+
+# Configuration files
+.env
+
+# Database files
+*.db
+
+# Dependency directories (for vendoring)
+vendor/
