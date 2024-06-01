@@ -1,7 +1,6 @@
 package models
 
 type User struct {
-	UserId    int    `json:"user_id,omitempty" bson:"user_id,omitempty"`
 	Email     string `json:"email,omitempty" bson:"email,omitempty"`
 	Password  string `json:"password,omitempty" bson:"password,omitempty"`
 	CreatedAt string `json:"created_at,omitempty" bson:"created_at,omitempty"`
@@ -10,7 +9,6 @@ type User struct {
 
 func (t User) UserResponse() map[string]interface{} {
 	return map[string]interface{}{
-		"userid":   t.UserId,
 		"email":    t.Email,
 		"password": t.Password,
 	}
