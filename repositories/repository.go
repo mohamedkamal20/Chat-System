@@ -10,4 +10,6 @@ type UserRepo interface {
 }
 
 type MessageRepo interface {
+	CreateMessage(message models.Message) error
+	GetMessagesByEmail(email string) ([]models.Message, error)
 }

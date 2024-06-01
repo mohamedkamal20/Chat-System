@@ -5,7 +5,9 @@ import (
 	"Chat-System/repositories"
 	"Chat-System/utils"
 	"encoding/json"
+	"github.com/gocql/gocql"
 	"net/http"
+	"time"
 )
 
 var userRepo repositories.UserRepo
@@ -29,6 +31,10 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	user.UserId = gocql.TimeUUID()
+	user.CreatedAt = time.Now()
+	user.UpdatedAt = time.Now()
 
 	err = userRepo.CreateUser(user)
 	if err != nil {
