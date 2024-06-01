@@ -5,6 +5,7 @@ import (
 	"Chat-System/repositories"
 	"Chat-System/utils"
 	"log"
+	"time"
 )
 
 type userRepository struct{}
@@ -14,8 +15,9 @@ func NewUserRepository() repositories.UserRepo {
 }
 
 func (r *userRepository) CreateUser(user models.User) error {
-	query := "INSERT INTO users (email, password) VALUES (?, ?)"
-	if err := utils.Session.Query(query, user.Email, user.Password).Exec(); err != nil {
+	user.Password = utils.HashPasswordMD5(user.Password)
+	query := "INSERT INTO users (email, password, created_at, updated_at) VALUES (?, ?, ?, ?)"
+	if err := utils.Session.Query(query, user.Email, user.Password, time.Now(), time.Now()).Exec(); err != nil {
 		log.Println("Error creating user:", err)
 		return err
 	}

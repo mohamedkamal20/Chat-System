@@ -22,6 +22,14 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
+
+	// Validate user input
+	err = utils.ValidateStruct(user)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
 	err = userRepo.CreateUser(user)
 	if err != nil {
 		http.Error(w, "Failed to create user", http.StatusInternalServerError)
@@ -42,7 +50,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "User not found", http.StatusNotFound)
 		return
 	}
-	if storedUser.Password != user.Password {
+	if storedUser.Password != utils.HashPasswordMD5(user.Password) {
 		http.Error(w, "Invalid password", http.StatusUnauthorized)
 		return
 	}

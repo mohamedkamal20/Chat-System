@@ -1,10 +1,12 @@
 package models
 
+import "time"
+
 type User struct {
-	Email     string `json:"email,omitempty" bson:"email,omitempty"`
-	Password  string `json:"password,omitempty" bson:"password,omitempty"`
-	CreatedAt string `json:"created_at,omitempty" bson:"created_at,omitempty"`
-	UpdatedAt string `json:"updated_at,omitempty" bson:"updated_at,omitempty"`
+	Email     string    `json:"email,omitempty" validate:"required,email" bson:"email,omitempty"`
+	Password  string    `json:"password,omitempty"  validate:"required,min=5" bson:"password,omitempty"`
+	CreatedAt time.Time `json:"created_at,omitempty" bson:"created_at,omitempty"`
+	UpdatedAt time.Time `json:"updated_at,omitempty" bson:"updated_at,omitempty"`
 }
 
 func (t User) UserResponse() map[string]interface{} {

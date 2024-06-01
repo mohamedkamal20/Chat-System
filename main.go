@@ -14,6 +14,8 @@ func main() {
 	utils.InitCassandra()
 	defer utils.Session.Close()
 
+	utils.InitValidator()
+
 	userRepo := user.NewUserRepository()
 	handlers.InitUserHandlers(userRepo)
 
