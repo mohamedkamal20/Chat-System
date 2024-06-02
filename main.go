@@ -27,16 +27,16 @@ func main() {
 	r := mux.NewRouter()
 
 	// User routes
-	r.HandleFunc("/register", handlers.Register).Methods("POST")
-	r.HandleFunc("/login", handlers.Login).Methods("POST")
+	r.HandleFunc("/api/v1/register", handlers.Register).Methods("POST")
+	r.HandleFunc("/api/v1/login", handlers.Login).Methods("POST")
 
 	protectedRoutes := r.PathPrefix("/").Subrouter()
 	// Apply middleware for JWT token authentication
 	protectedRoutes.Use(middlewares.AuthMiddleware)
 
 	// Message routes
-	protectedRoutes.HandleFunc("/send", handlers.SendMessage).Methods("POST")
-	protectedRoutes.HandleFunc("/message-history/{email}", handlers.GetMessageHistory).Methods("GET")
+	protectedRoutes.HandleFunc("/api/v1/send", handlers.SendMessage).Methods("POST")
+	protectedRoutes.HandleFunc("/api/v1/message-history/{email}", handlers.GetMessageHistory).Methods("GET")
 
 	http.Handle("/", r)
 

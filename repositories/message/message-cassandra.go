@@ -8,7 +8,7 @@ import (
 
 type MessageRepository interface {
 	CreateMessage(message models.Message) error
-	GetMessagesByEmail(email string) ([]models.Message, error)
+	GetMessagesByEmail(email string) ([]map[string]interface{}, error)
 }
 
 type messageRepository struct{}
@@ -26,9 +26,9 @@ func (r *messageRepository) CreateMessage(message models.Message) error {
 	return nil
 }
 
-func (r *messageRepository) GetMessagesByEmail(email string) ([]models.Message, error) {
-	var messages []models.Message
-	query := "SELECT message_id, sender, recipient, content, created_at FROM messages WHERE sender = ? ALLOW FILTERING"
+func (r *messageRepository) GetMessagesByEmail(email string) ([]map[string]interface{}, error) {
+	var response []map[string]interface{}
+	query := "SELECT sender, recipient, content, created_at FROM messages WHERE sender = ? ALLOW FILTERING"
 	scanner := utils.Session.Query(query, email).Iter().Scanner()
 	var message models.Message
 
@@ -38,11 +38,11 @@ func (r *messageRepository) GetMessagesByEmail(email string) ([]models.Message, 
 			log.Println("Error retrieving messages:", err)
 			return nil, err
 		}
-		messages = append(messages, message)
+		response = append(response, message.MessageResponse())
 	}
 	if err := scanner.Err(); err != nil {
 		log.Println("Error retrieving messages:", err)
 		return nil, err
 	}
-	return messages, nil
+	return response, nil
 }

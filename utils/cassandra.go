@@ -10,10 +10,11 @@ import (
 var Session *gocql.Session
 
 func InitCassandra() {
-	cluster := gocql.NewCluster("127.0.0.1:9042") // replace with your Cassandra host
-	cluster.Keyspace = "chat_system"              // replace with your keyspace name
+	cluster := gocql.NewCluster("cassandra") // replace with your Cassandra host
+	cluster.Port = 9042
+	cluster.Keyspace = "chat_system" // replace with your keyspace name
 	cluster.Consistency = gocql.Quorum
-	cluster.ConnectTimeout = 10 * time.Second
+	cluster.ConnectTimeout = 20 * time.Second
 
 	var err error
 	Session, err = cluster.CreateSession()

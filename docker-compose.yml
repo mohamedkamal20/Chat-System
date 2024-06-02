@@ -8,10 +8,10 @@ services:
     depends_on:
       - cassandra
       - redis
-      - cassandra-init
     environment:
       - CASSANDRA_HOST=cassandra
       - REDIS_HOST=redis
+    restart: always
     networks:
       - cassandra-net
 
@@ -21,6 +21,7 @@ services:
       - "9042:9042"
     networks:
       - cassandra-net
+    restart: always
 
 #  cassandra1:
 #    image: cassandra:latest
@@ -64,6 +65,7 @@ services:
     image: redis:latest
     ports:
       - "6379:6379"
+    restart: always
 
   cassandra-init:
     build:
@@ -74,6 +76,7 @@ services:
     networks:
       - cassandra-net
     entrypoint: [ "sh", "-c", "until cqlsh cassandra -e 'describe keyspaces'; do echo 'Waiting for Cassandra to be up...'; sleep 5; done; cqlsh cassandra -f /docker-entrypoint-initdb.d/init.cql" ]
+    restart: unless-stopped
 
 networks:
   cassandra-net:
