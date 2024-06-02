@@ -28,14 +28,19 @@ func (r *messageRepository) CreateMessage(message models.Message) error {
 
 func (r *messageRepository) GetMessagesByEmail(email string) ([]models.Message, error) {
 	var messages []models.Message
-	//OR recipient = ? ALLOW FILTERING
-	query := "SELECT message_id, sender, recipient, content, created_at FROM messages WHERE sender = ? "
-	iter := utils.Session.Query(query, email).Iter()
+	query := "SELECT message_id, sender, recipient, content, created_at FROM messages WHERE sender = ?"
+	scanner := utils.Session.Query(query, email).Iter().Scanner()
 	var message models.Message
-	for iter.Scan(&message.MessageID, &message.Sender, &message.Recipient, &message.Content, &message.CreatedAt) {
+
+	for scanner.Next() {
+		err := scanner.Scan(&message.MessageID, &message.Sender, &message.Recipient, &message.Content, &message.CreatedAt)
+		if err != nil {
+			log.Println("Error retrieving messages:", err)
+			return nil, err
+		}
 		messages = append(messages, message)
 	}
-	if err := iter.Close(); err != nil {
+	if err := scanner.Err(); err != nil {
 		log.Println("Error retrieving messages:", err)
 		return nil, err
 	}
