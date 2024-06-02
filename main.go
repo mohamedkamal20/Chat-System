@@ -36,7 +36,7 @@ func main() {
 
 	// Message routes
 	protectedRoutes.HandleFunc("/api/v1/send", handlers.SendMessage).Methods("POST")
-	protectedRoutes.HandleFunc("/api/v1/message-history/{email}", handlers.GetMessageHistory).Methods("GET")
+	protectedRoutes.HandleFunc("/api/v1/messages/{email}", handlers.GetMessageHistory).Methods("GET")
 
 	http.Handle("/", r)
 
