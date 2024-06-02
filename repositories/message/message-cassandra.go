@@ -28,7 +28,7 @@ func (r *messageRepository) CreateMessage(message models.Message) error {
 
 func (r *messageRepository) GetMessagesByEmail(email string) ([]models.Message, error) {
 	var messages []models.Message
-	query := "SELECT message_id, sender, recipient, content, created_at FROM messages WHERE sender = ?"
+	query := "SELECT message_id, sender, recipient, content, created_at FROM messages WHERE sender = ? ALLOW FILTERING"
 	scanner := utils.Session.Query(query, email).Iter().Scanner()
 	var message models.Message
 
