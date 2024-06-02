@@ -33,7 +33,7 @@ func (r *messageRepository) GetMessagesByEmail(email string) ([]map[string]inter
 	var message models.Message
 
 	for scanner.Next() {
-		err := scanner.Scan(&message.MessageID, &message.Sender, &message.Recipient, &message.Content, &message.CreatedAt)
+		err := scanner.Scan(&message.Sender, &message.Recipient, &message.Content, &message.CreatedAt)
 		if err != nil {
 			log.Println("Error retrieving messages:", err)
 			return nil, err

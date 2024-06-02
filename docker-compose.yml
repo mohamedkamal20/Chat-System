@@ -7,6 +7,7 @@ services:
       - "8080:8080"
     depends_on:
       - cassandra
+      - cassandra2
       - redis
     environment:
       - CASSANDRA_HOST=cassandra
@@ -17,49 +18,31 @@ services:
 
   cassandra:
     image: cassandra:latest
+    container_name: cassandra
     ports:
       - "9042:9042"
+    environment:
+      - CASSANDRA_CLUSTER_NAME=ChatCluster
+      - CASSANDRA_SEEDS=cassandra,cassandra2
+      - CASSANDRA_DC=datacenter1
+      - CASSANDRA_RACK=rack1
+    volumes:
+      - ./data:/var/lib/cassandra
     networks:
       - cassandra-net
-    restart: always
 
-#  cassandra1:
-#    image: cassandra:latest
-#    container_name: cassandra1
-#    ports:
-#      - "9042:9042"
-#    environment:
-#      - CASSANDRA_CLUSTER_NAME=cassandra-cluster
-#      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
-#    volumes:
-#      - ./cassandra1/data:/var/lib/cassandra
-#      - ./cassandra1/config:/etc/cassandra
-#
-#  cassandra2:
-#    image: cassandra:latest
-#    container_name: cassandra2
-#    ports:
-#      - "9043:9042"
-#    environment:
-#      - CASSANDRA_SEEDS=cassandra1
-#      - CASSANDRA_CLUSTER_NAME=cassandra-cluster
-#      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
-#    volumes:
-#      - ./cassandra2/data:/var/lib/cassandra
-#      - ./cassandra2/config:/etc/cassandra
-#
-#  cassandra3:
-#    image: cassandra:latest
-#    container_name: cassandra3
-#    ports:
-#      - "9044:9042"
-#    environment:
-#      - CASSANDRA_SEEDS=cassandra1
-#      - CASSANDRA_CLUSTER_NAME=cassandra-cluster
-#      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
-#    volumes:
-#      - ./cassandra3/data:/var/lib/cassandra
-#      - ./cassandra3/config:/etc/cassandra
+  cassandra2:
+    image: cassandra:latest
+    container_name: cassandra2
+    environment:
+      - CASSANDRA_CLUSTER_NAME=ChatCluster
+      - CASSANDRA_SEEDS=cassandra,cassandra2
+      - CASSANDRA_DC=datacenter1
+      - CASSANDRA_RACK=rack1
+    networks:
+      - cassandra-net
+    volumes:
+      - ./data2:/var/lib/cassandra
 
   redis:
     image: redis:latest
@@ -73,10 +56,41 @@ services:
       dockerfile: Dockerfile.init
     depends_on:
       - cassandra
+      - cassandra2
     networks:
       - cassandra-net
     entrypoint: [ "sh", "-c", "until cqlsh cassandra -e 'describe keyspaces'; do echo 'Waiting for Cassandra to be up...'; sleep 5; done; cqlsh cassandra -f /docker-entrypoint-initdb.d/init.cql" ]
     restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - cassandra-net
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - cassandra-net
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "8085:8085"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - app
+    networks:
+      - cassandra-net
 
 networks:
   cassandra-net:
