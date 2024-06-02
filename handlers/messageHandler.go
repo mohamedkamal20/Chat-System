@@ -51,6 +51,17 @@ func GetMessageHistory(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	email := vars["email"]
 
+	/*
+		// Check cached messages by email
+		messages, err := redis.GetMessages(email)
+		if err != nil {
+			messages, err = messageRepo.GetMessagesByEmail(email)
+			if err != nil {
+				http.Error(w, "Failed to retrieve messages", http.StatusInternalServerError)
+				return
+			}
+		}
+	*/
 	messages, err := messageRepo.GetMessagesByEmail(email)
 	if err != nil {
 		http.Error(w, "Failed to retrieve messages", http.StatusInternalServerError)
