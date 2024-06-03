@@ -3,6 +3,7 @@ package handlers
 import (
 	"Chat-System/models"
 	"Chat-System/repositories"
+	"Chat-System/utils"
 	"encoding/json"
 	"github.com/gocql/gocql"
 	"github.com/gorilla/mux"
@@ -21,6 +22,13 @@ func SendMessage(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&message)
 	if err != nil {
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return
+	}
+
+	// Check if not authorized
+	tokenEmail, ok := r.Context().Value("email").(string)
+	if !ok || (tokenEmail != message.Sender) {
+		http.Error(w, "Unauthorized access", http.StatusUnauthorized)
 		return
 	}
 
@@ -50,6 +58,19 @@ func SendMessage(w http.ResponseWriter, r *http.Request) {
 func GetMessageHistory(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	email := vars["email"]
+
+	// Validate the email parameter format
+	if !utils.IsValidEmail(email) {
+		http.Error(w, "Invalid email format", http.StatusBadRequest)
+		return
+	}
+
+	// Check if not authorized
+	tokenEmail, ok := r.Context().Value("email").(string)
+	if !ok || (tokenEmail != email) {
+		http.Error(w, "Unauthorized access", http.StatusUnauthorized)
+		return
+	}
 
 	/*
 		// Check cached messages by email

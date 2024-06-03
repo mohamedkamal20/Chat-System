@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"Chat-System/utils"
+	"context"
 	"github.com/dgrijalva/jwt-go"
 	"net/http"
 	"strings"
@@ -31,6 +32,10 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			http.Error(w, "Invalid token", http.StatusUnauthorized)
 			return
 		}
+
+		// Add email to the context
+		ctx := context.WithValue(r.Context(), "email", claims.Email)
+		r = r.WithContext(ctx)
 
 		next.ServeHTTP(w, r)
 	})

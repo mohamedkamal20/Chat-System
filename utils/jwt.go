@@ -11,7 +11,7 @@ type Claims struct {
 	jwt.StandardClaims
 }
 
-var JwtKey = []byte("my_secret_key")
+var JwtKey = []byte(GetEnv("JWT_KEY", "my_secret_key"))
 
 func GenerateJWT(email string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{

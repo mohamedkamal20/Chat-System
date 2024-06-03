@@ -10,12 +10,12 @@ import (
 var Session *gocql.Session
 
 func InitCassandra() {
-	cluster := gocql.NewCluster("cassandra", "cassandra2") // replace with your Cassandra host
+	cluster := gocql.NewCluster("cassandra", "cassandra2")
 	cluster.Port = 9042
-	cluster.Keyspace = "chat_system" // replace with your keyspace name
+	cluster.Keyspace = "chat_system"
 	cluster.Consistency = gocql.Quorum
 
-	cluster.ProtoVersion = 4 // Ensure the protocol version is set
+	cluster.ProtoVersion = 4
 
 	// Setting up reconnection policies
 	cluster.RetryPolicy = &gocql.SimpleRetryPolicy{NumRetries: 5}

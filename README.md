@@ -19,8 +19,8 @@ In order to run the application please follow the steps:
     * port `8085` for Nginx.
     * port `9042` for default Cassandra port.
     * port `6379` for default redis port.
-    * port `9090` for default Prometheus port.
-    * port `3000` for default grafana port.
+    * port `9090` for default Prometheus port and you can view it on `http://localhost:9090/`.
+    * port `3000` for default grafana port and you can view it on `http://localhost:3000/`.
 
 ### Quick start
 * Clone the project .
