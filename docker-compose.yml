@@ -6,9 +6,12 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - cassandra
-      - cassandra2
-      - redis
+      redis:
+        condition: service_healthy
+      cassandra:
+        condition: service_healthy
+      cassandra2:
+        condition: service_healthy
     environment:
       - CASSANDRA_HOST=cassandra
       - REDIS_HOST=redis
@@ -31,6 +34,11 @@ services:
       - ./data:/var/lib/cassandra
     networks:
       - cassandra-net
+    healthcheck:
+      test: [ "CMD", "cqlsh", "-e", "describe keyspaces" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   cassandra2:
     image: cassandra:latest
@@ -44,20 +52,34 @@ services:
       - cassandra-net
     volumes:
       - ./data2:/var/lib/cassandra
+    healthcheck:
+      test: [ "CMD", "cqlsh", "-e", "describe keyspaces" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   redis:
     image: redis:latest
     ports:
       - "6379:6379"
     restart: always
+    networks:
+      - cassandra-net
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   cassandra-init:
     build:
       context: .
       dockerfile: Dockerfile.init
     depends_on:
-      - cassandra
-      - cassandra2
+      cassandra:
+        condition: service_healthy
+      cassandra2:
+        condition: service_healthy
     networks:
       - cassandra-net
     entrypoint: [ "sh", "-c", "until cqlsh cassandra -e 'describe keyspaces'; do echo 'Waiting for Cassandra to be up...'; sleep 5; done; cqlsh cassandra -f /docker-entrypoint-initdb.d/init.cql" ]
