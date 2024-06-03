@@ -14,7 +14,6 @@ func NewUserRepository() repositories.UserRepo {
 }
 
 func (r *userRepository) CreateUser(user models.User) error {
-	user.Password = utils.HashPasswordMD5(user.Password)
 	query := "INSERT INTO users (user_id, email, password, created_at, updated_at) VALUES (?, ?, ?, ?, ?)"
 	if err := utils.Session.Query(query, user.UserId, user.Email, user.Password, user.CreatedAt, user.UpdatedAt).Exec(); err != nil {
 		log.Println("Error creating user:", err)

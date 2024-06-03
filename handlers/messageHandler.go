@@ -34,15 +34,24 @@ func SendMessage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check if sender and recipient exist
-	_, err = userRepo.GetUserByEmail(message.Sender)
-	if err != nil {
-		http.Error(w, "Sender not found", http.StatusNotFound)
-		return
+
+	// Get sender user from cache
+	cachedSenderUser, err := redis.GetUser(message.Sender)
+	if cachedSenderUser == nil {
+		_, err = userRepo.GetUserByEmail(message.Sender)
+		if err != nil {
+			http.Error(w, "Sender not found", http.StatusNotFound)
+			return
+		}
 	}
-	_, err = userRepo.GetUserByEmail(message.Recipient)
-	if err != nil {
-		http.Error(w, "Recipient not found", http.StatusNotFound)
-		return
+	// Get Recipient user from cache
+	cachedRecipientUser, err := redis.GetUser(message.Recipient)
+	if cachedRecipientUser == nil {
+		_, err = userRepo.GetUserByEmail(message.Recipient)
+		if err != nil {
+			http.Error(w, "Recipient not found", http.StatusNotFound)
+			return
+		}
 	}
 
 	message.MessageID = gocql.TimeUUID()
@@ -53,6 +62,11 @@ func SendMessage(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to send message", http.StatusInternalServerError)
 		return
 	}
+
+	// Remove key from cache
+	redis.InvalidateCacheMessages(message.Sender)
+	redis.InvalidateCacheMessages(message.Recipient)
+
 	w.WriteHeader(http.StatusCreated)
 }
 
