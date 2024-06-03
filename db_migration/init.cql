@@ -17,4 +17,4 @@ CREATE TABLE IF NOT EXISTS messages (
         content TEXT,
         created_at TIMESTAMP,
         updated_at TIMESTAMP,
-);
+)WITH CLUSTERING ORDER BY (created_at DESC);

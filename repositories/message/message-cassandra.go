@@ -28,9 +28,26 @@ func (r *messageRepository) CreateMessage(message models.Message) error {
 
 func (r *messageRepository) GetMessagesByEmail(email string) ([]map[string]interface{}, error) {
 	var response []map[string]interface{}
-	query := "SELECT sender, recipient, content, created_at FROM messages WHERE sender = ? ALLOW FILTERING"
-	scanner := utils.Session.Query(query, email).Iter().Scanner()
+
+	senderQuery := "SELECT sender, recipient, content, created_at FROM messages WHERE sender = ? ALLOW FILTERING"
+	scanner := utils.Session.Query(senderQuery, email).Iter().Scanner()
 	var message models.Message
+
+	for scanner.Next() {
+		err := scanner.Scan(&message.Sender, &message.Recipient, &message.Content, &message.CreatedAt)
+		if err != nil {
+			log.Println("Error retrieving messages:", err)
+			return nil, err
+		}
+		response = append(response, message.MessageResponse())
+	}
+	if err := scanner.Err(); err != nil {
+		log.Println("Error retrieving messages:", err)
+		return nil, err
+	}
+
+	recipientQuery := "SELECT sender, recipient, content, created_at FROM messages WHERE recipient = ? ALLOW FILTERING"
+	scanner = utils.Session.Query(recipientQuery, email).Iter().Scanner()
 
 	for scanner.Next() {
 		err := scanner.Scan(&message.Sender, &message.Recipient, &message.Content, &message.CreatedAt)
