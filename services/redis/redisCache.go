@@ -2,6 +2,7 @@ package redis
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	goredislib "github.com/go-redis/redis/v8"
 )
@@ -27,26 +28,40 @@ func initRedisClient(ctx context.Context, db int) {
 	}
 }
 
-func SetMessages() {
+func SetMessages(email string, messages []map[string]interface{}) {
 	ctx := context.Background()
 	db := 0 // Set the desired Redis DB number
 	initRedisClient(ctx, db)
 
-	err := redisClient.Set(ctx, "key", "value", 0).Err()
+	// Serialize the list of messages to JSON
+	jsonData, err := json.Marshal(messages)
+	if err != nil {
+		fmt.Println("Error serializing messages:", err)
+		return
+	}
+	err = redisClient.Set(ctx, email, jsonData, 0).Err()
 	if err != nil {
 		fmt.Println("Error setting key:", err)
 	}
 }
 
-func GetMessages(email string) /* ([]map[string]interface{}, error) */ {
+func GetMessages(email string) ([]map[string]interface{}, error) {
 	ctx := context.Background()
 	db := 0 // Set the desired Redis DB number
 	initRedisClient(ctx, db)
 
-	//messages, err := redisClient.LRange(ctx, email, 0, -1).Result()
-	//if err != nil {
-	//	fmt.Println("Error getting key:", err)
-	//	return nil, err
-	//}
-	//return messages, nil
+	val, err := redisClient.Get(ctx, email).Result()
+	if err != nil {
+		fmt.Println("Error getting key:", err)
+		return nil, err
+	}
+
+	// Deserialize the JSON string back to a list of messages
+	var retrievedMessages []map[string]interface{}
+	err = json.Unmarshal([]byte(val), &retrievedMessages)
+	if err != nil {
+		fmt.Println("Error deserializing messages:", err)
+		return nil, err
+	}
+	return retrievedMessages, nil
 }

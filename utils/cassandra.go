@@ -1,10 +1,9 @@
 package utils
 
 import (
+	"github.com/gocql/gocql"
 	"log"
 	"time"
-
-	"github.com/gocql/gocql"
 )
 
 var Session *gocql.Session

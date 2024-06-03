@@ -3,6 +3,7 @@ package handlers
 import (
 	"Chat-System/models"
 	"Chat-System/repositories"
+	"Chat-System/services/redis"
 	"Chat-System/utils"
 	"encoding/json"
 	"github.com/gocql/gocql"
@@ -72,21 +73,15 @@ func GetMessageHistory(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	/*
-		// Check cached messages by email
-		messages, err := redis.GetMessages(email)
-		if err != nil {
-			messages, err = messageRepo.GetMessagesByEmail(email)
-			if err != nil {
-				http.Error(w, "Failed to retrieve messages", http.StatusInternalServerError)
-				return
-			}
-		}
-	*/
-	messages, err := messageRepo.GetMessagesByEmail(email)
+	// Check cached messages by email
+	messages, err := redis.GetMessages(email)
 	if err != nil {
-		http.Error(w, "Failed to retrieve messages", http.StatusInternalServerError)
-		return
+		messages, err = messageRepo.GetMessagesByEmail(email)
+		if err != nil {
+			http.Error(w, "Failed to retrieve messages", http.StatusInternalServerError)
+			return
+		}
+		redis.SetMessages(email, messages)
 	}
 	json.NewEncoder(w).Encode(messages)
 }
