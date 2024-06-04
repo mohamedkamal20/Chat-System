@@ -5,10 +5,12 @@ import (
 	"Chat-System/repositories"
 	"Chat-System/services/redis"
 	"Chat-System/utils"
+	"encoding/base64"
 	"encoding/json"
 	"github.com/gocql/gocql"
 	"github.com/gorilla/mux"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -87,15 +89,37 @@ func GetMessageHistory(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Get pagination parameters from query
+	pageStateBase64 := r.URL.Query().Get("pageState")
+	countParam := r.URL.Query().Get("count")
+
+	// Default values
+	count := 10
+
+	pageState, err := base64.StdEncoding.DecodeString(pageStateBase64)
+	if pageStateBase64 != "" && err != nil {
+		http.Error(w, "Invalid paging state", http.StatusBadRequest)
+		return
+	}
+
+	if countParam != "" {
+		var err error
+		count, err = strconv.Atoi(countParam)
+		if err != nil {
+			http.Error(w, "Invalid count parameter", http.StatusBadRequest)
+			return
+		}
+	}
+
 	// Check cached messages by email
-	messages, err := redis.GetMessages(email)
+	messages, err := redis.GetMessages(email, count)
 	if err != nil {
-		messages, err = messageRepo.GetMessagesByEmail(email)
+		messages, err = messageRepo.GetMessagesByEmail(email, count, pageState)
 		if err != nil {
 			http.Error(w, "Failed to retrieve messages", http.StatusInternalServerError)
 			return
 		}
-		redis.SetMessages(email, messages)
+		redis.SetMessages(email, messages, count)
 	}
 	json.NewEncoder(w).Encode(messages)
 }

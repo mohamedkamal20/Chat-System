@@ -2,6 +2,7 @@ package redis
 
 import (
 	"Chat-System/models"
+	"Chat-System/repositories/message"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -31,12 +32,12 @@ func initRedisClient(ctx context.Context, db int) {
 	}
 }
 
-func SetMessages(email string, messages []map[string]interface{}) {
+func SetMessages(email string, messages message.MessagesResponse, count int) {
 	ctx := context.Background()
 	db := 0 // Set the desired Redis DB number
 	initRedisClient(ctx, db)
 
-	cacheKey := fmt.Sprintf("messages:%s", email)
+	cacheKey := fmt.Sprintf("messages:%s:%d", email, count)
 	// Serialize the list of messages to JSON
 	jsonData, err := json.Marshal(messages)
 	if err != nil {
@@ -49,24 +50,25 @@ func SetMessages(email string, messages []map[string]interface{}) {
 	}
 }
 
-func GetMessages(email string) ([]map[string]interface{}, error) {
+func GetMessages(email string, count int) (message.MessagesResponse, error) {
 	ctx := context.Background()
 	db := 0
 	initRedisClient(ctx, db)
 
-	cacheKey := fmt.Sprintf("messages:%s", email)
+	cacheKey := fmt.Sprintf("messages:%s:%d", email, count)
+	// Deserialize the JSON string back to a dict of messages
+	var retrievedMessages message.MessagesResponse
+
 	val, err := redisClient.Get(ctx, cacheKey).Result()
 	if err != nil {
 		fmt.Println("Error getting key:", err)
-		return nil, err
+		return retrievedMessages, err
 	}
 
-	// Deserialize the JSON string back to a list of messages
-	var retrievedMessages []map[string]interface{}
 	err = json.Unmarshal([]byte(val), &retrievedMessages)
 	if err != nil {
 		fmt.Println("Error deserializing messages:", err)
-		return nil, err
+		return retrievedMessages, err
 	}
 	return retrievedMessages, nil
 }
@@ -75,8 +77,13 @@ func InvalidateCacheMessages(email string) {
 	ctx := context.Background()
 	db := 0
 	initRedisClient(ctx, db)
-	cacheKey := fmt.Sprintf("messages:%s", email)
-	redisClient.Del(ctx, cacheKey)
+	cacheKey := fmt.Sprintf("messages:%s:", email)
+
+	iter := redisClient.Scan(ctx, 0, cacheKey+"*", 0).Iterator()
+	for iter.Next(ctx) {
+		redisClient.Del(ctx, iter.Val()).Err()
+	}
+
 }
 
 func InvalidateCacheUser(email string) {

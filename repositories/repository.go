@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"Chat-System/models"
+	"Chat-System/repositories/message"
 )
 
 type UserRepo interface {
@@ -11,5 +12,5 @@ type UserRepo interface {
 
 type MessageRepo interface {
 	CreateMessage(message models.Message) error
-	GetMessagesByEmail(email string) ([]map[string]interface{}, error)
+	GetMessagesByEmail(email string, count int, pageState []byte) (message.MessagesResponse, error)
 }
