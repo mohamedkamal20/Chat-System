@@ -35,4 +35,4 @@ In order to run the application please follow the steps:
   
   * ##### Hint : Must use Auth Token from Login Endpoint for those APIs 
   *`localhost:8085/api/v1/send/ [POST] {"sender": "example@gmail.com", "recipient":"example2@gmail.com", "content":"Hello"}`\
-  *`localhost:8085/api/v1/messages/{email} [GET]`
+  *`localhost:8085/api/v1/messages/{email}?count=5 [GET]`
