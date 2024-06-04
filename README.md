@@ -30,9 +30,9 @@ In order to run the application please follow the steps:
 
 ### Test services
   * ##### You can find postman export file under `Chat_System.postman_collection.json` name.
-  *`localhost:8085/api/v1/login/ [POST] {"email": "example@gmail.com", "password":"password"}`\
-  *`localhost:8085/api/v1/register/ [POST] {"email": "example@gmail.com", "password":"password"}`
+  *`localhost:8085/api/v1/login [POST] {"email": "example@gmail.com", "password":"password"}`\
+  *`localhost:8085/api/v1/register [POST] {"email": "example@gmail.com", "password":"password"}`
   
   * ##### Hint : Must use Auth Token from Login Endpoint for those APIs 
-  *`localhost:8085/api/v1/send/ [POST] {"sender": "example@gmail.com", "recipient":"example2@gmail.com", "content":"Hello"}`\
+  *`localhost:8085/api/v1/send [POST] {"sender": "example@gmail.com", "recipient":"example2@gmail.com", "content":"Hello"}`\
   *`localhost:8085/api/v1/messages/{email}?count=5 [GET]`
