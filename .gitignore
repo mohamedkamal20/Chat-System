@@ -28,8 +28,6 @@ go.work
 *.sublime-project
 *.sublime-workspace
 
-# Go module files
-go.sum
 
 # Logs
 *.log
